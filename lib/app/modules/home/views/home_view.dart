@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prak_mobile/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 import '../../profile/profile_view.dart';
 
@@ -28,6 +29,7 @@ class HomeView extends GetView<HomeController> {
             'Good Afternoon',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),
+          leading: IconButton(onPressed: () => Get.toNamed(Routes.BOOKLIST), icon: Icon(Icons.book, color: Colors.white,)),
           actions: [
             GestureDetector(
               onTap: () {

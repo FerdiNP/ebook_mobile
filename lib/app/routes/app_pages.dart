@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:prak_mobile/app/modules/book_view/book_page.dart';
+import 'package:prak_mobile/app/modules/profile/profile_view.dart';
 
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
@@ -13,8 +15,15 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.HOME,
-      page: () => const HomeView(),
-      binding: HomeBinding(),
+      page: () => HomeView(),
+    ),
+    GetPage(
+      name: _Paths.PROFILE,
+      page: () =>  ProfileView(),
+    ),
+    GetPage(
+      name: _Paths.BOOKLIST,
+      page: () => BookListPage(),
     ),
   ];
 }
