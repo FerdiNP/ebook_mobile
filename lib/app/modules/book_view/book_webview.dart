@@ -18,19 +18,19 @@ class _BookDetailWebViewState extends State<BookDetailWebView> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://www.google.co.id/books/edition/_/${widget.bookId}')); // Load the initial URL
+      ..loadRequest(Uri.parse('https://www.google.co.id/books/edition/_/${widget.bookId}')); // Load URL
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("eBook Preview", style: TextStyle(color: Colors.white)), // Ubah warna teks
-        backgroundColor: const Color(0xFF181919), // Menggunakan warna yang sama dengan Home
+        title: const Text("eBook Preview", style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF181919),
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white), // Ubah warna ikon
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: WebViewWidget(controller: _controller), // Updated WebViewWidget
+      body: WebViewWidget(controller: _controller),
     );
   }
 }

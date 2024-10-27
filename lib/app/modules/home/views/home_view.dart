@@ -34,7 +34,7 @@ class HomeView extends GetView<HomeController> {
             GestureDetector(
               onTap: () {
                 // Menavigasi ke halaman profil
-                Get.toNamed('/profile');
+                Get.toNamed(Routes.ACCOUNT);
               },
               child: CircleAvatar(
                 backgroundImage: AssetImage('assets/images/profile-picture.png'),

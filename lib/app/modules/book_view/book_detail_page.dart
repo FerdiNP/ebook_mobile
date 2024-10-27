@@ -31,7 +31,7 @@ class BookDetailPage extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text("Error loading book details", style: TextStyle(color: _textColor)));
+            return Center(  child: Text("Error loading book details", style: TextStyle(color: _textColor)));
           }
 
           final book = snapshot.data!;
@@ -87,7 +87,7 @@ class BookDetailPage extends StatelessWidget {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      Get.to(() => BookDetailWebView(bookId: book.id)); // Now it's a valid URL
+                      Get.to(() => BookDetailWebView(bookId: book.id)); // Valid URL
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _mainColor,
