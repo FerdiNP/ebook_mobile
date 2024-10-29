@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "203608316252",
+    "project_id": "ebook-f190c",
+    "storage_bucket": "ebook-f190c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203608316252:android:481622db2d01f17207c999",
+        "android_client_info": {
+          "package_name": "com.example.prak_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBrhC5C8dZE27HlCSIgeYhZ2XMYGiUP_o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
