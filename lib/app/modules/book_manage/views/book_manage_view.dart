@@ -11,8 +11,7 @@ class ManageBooksPage extends StatefulWidget {
 
 class _ManageBooksPageState extends State<ManageBooksPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final CollectionReference _booksCollection =
-      FirebaseFirestore.instance.collection('books');
+  final CollectionReference _booksCollection = FirebaseFirestore.instance.collection('books');
 
   Future<void> _deleteBook(String bookId) async {
     try {

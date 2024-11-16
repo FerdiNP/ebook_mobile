@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:get/get.dart';
 import 'package:prak_mobile/app/controller/auth_controller/auth_controller.dart';
 import 'package:prak_mobile/app/modules/register/views/register_view.dart';
+import 'package:prak_mobile/app/routes/app_pages.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -14,8 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _showPasswordInput = false; // State variable to toggle input screen
-
+  bool _showPasswordInput = false;
   @override
   void dispose() {
     _emailController.dispose();
@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (!_showPasswordInput) ...[
                             const SizedBox(height: 16),
                             GestureDetector(
-                              onTap: () {}, // Define forgot password action
+                              onTap: () {},
                               child: Text(
                                 "Forgot password?",
                                 style: theme.textTheme.bodyMedium!.copyWith(color: Colors.green),
@@ -88,10 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                             InkWell(
                               onTap: () {
                                 // Tambahkan logika untuk berpindah halaman di sini
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => RegisterPage()), // Ganti dengan halaman yang ingin dituju
-                                );
+                                Get.toNamed(Routes.REGISTER);
                               },
                               child: RichText(
                                 text: TextSpan(

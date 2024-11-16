@@ -49,7 +49,11 @@ dependencies:
   shared_preferences:
   intl:
   firebase_storage:
-
+  get_storage:
+  video_player:
+  speech_to_text:
+  permission_handler:
+  audioplayers:
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:prak_mobile/app/modules/account/views/account_view.dart';
 import 'package:prak_mobile/app/modules/admin/views/admin_view.dart';
 import 'package:prak_mobile/app/modules/book_view/book_page.dart';
+import 'package:prak_mobile/app/modules/detail_book/detail_book.dart';
 import 'package:prak_mobile/app/modules/login/views/login_views.dart';
 import 'package:prak_mobile/app/modules/profile/profile_view.dart';
 
@@ -58,6 +59,10 @@ class AppPages {
     GetPage(
       name: _Paths.BOOKLIST,
       page: () => BookListPage(),
+    ),
+    GetPage(
+      name: _Paths.BOOK_DETAIL,
+      page: () => BookDetailPage(),
     ),
   ];
 }

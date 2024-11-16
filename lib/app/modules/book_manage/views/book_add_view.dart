@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:prak_mobile/app/controller/auth_controller/storage_controller.dart';
 import 'package:prak_mobile/app/routes/app_pages.dart';
+import 'package:video_player/video_player.dart';
 
 class AddBooksPage extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class AddBooksPage extends StatefulWidget {
 }
 
 class _AddBooksPageState extends State<AddBooksPage> {
+  final StorageController _storageController = StorageController();
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   String id = '';
@@ -21,13 +24,15 @@ class _AddBooksPageState extends State<AddBooksPage> {
   String genre = '';
   DateTime? publicationDate;
   String coverImageUrl = '';
+  String videoUrl = '';
   String fileUrl = '';
   int pages = 0;
   String language = '';
-  File? _coverImageFile; // To store the picked cover image file
-  File? _uploadedFile; // To store the picked file for upload
-  bool _isUploading = false; // To prevent double uploads
-  bool _isLoading = false; // To show loading indicator
+  File? _coverImageFile;
+  File? _videoFile;
+  File? _uploadedFile;
+  bool _isUploading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -40,30 +45,11 @@ class _AddBooksPageState extends State<AddBooksPage> {
       description = args['description'] ?? '';
       genre = args['genre'] ?? '';
       coverImageUrl = args['coverImageUrl'] ?? '';
+      videoUrl = args['videoUrl'] ?? '';
       fileUrl = args['fileUrl'] ?? '';
       pages = args['pages'] ?? 0;
       language = args['language'] ?? '';
       publicationDate = args['publicationDate'] ?? DateTime.now();
-    }
-  }
-
-  Future<void> _pickCoverImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _coverImageFile = File(pickedFile.path);
-        print("Picked cover image path: ${pickedFile.path}"); // Debugging
-      });
-    }
-  }
-
-  Future<void> _pickFile() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery); // Change if you need a different file type
-    if (pickedFile != null) {
-      setState(() {
-        _uploadedFile = File(pickedFile.path);
-        print("Picked file path: ${pickedFile.path}"); // Debugging
-      });
     }
   }
 
@@ -96,10 +82,18 @@ class _AddBooksPageState extends State<AddBooksPage> {
           print("Cover image uploaded to: $coverImageUrl");
         }
 
-        if (_uploadedFile != null && !_isUploading) {
+        // if (_uploadedFile != null && !_isUploading) {
+        //   _isUploading = true; // Prevent double uploads
+        //   fileUrl = await _uploadFile(_uploadedFile!, 'files');
+        //   print("File uploaded to: $fileUrl");
+        // }
+
+        if (_videoFile != null && !_isUploading) {
           _isUploading = true; // Prevent double uploads
-          fileUrl = await _uploadFile(_uploadedFile!, 'files');
-          print("File uploaded to: $fileUrl");
+          videoUrl = await _uploadFile(_videoFile!, 'videos');
+          print("Video uploaded to: $videoUrl");
+        } else {
+          print("Not Found");
         }
 
         if (id.isNotEmpty) {
@@ -110,6 +104,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
             'genre': genre,
             'publicationDate': Timestamp.fromDate(publicationDate!),
             'coverImageUrl': coverImageUrl,
+            'videoUrl': videoUrl,
             'fileUrl': fileUrl,
             'pages': pages,
             'language': language,
@@ -123,6 +118,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
             'genre': genre,
             'publicationDate': Timestamp.fromDate(publicationDate!),
             'coverImageUrl': coverImageUrl,
+            'videoUrl': videoUrl,
             'fileUrl': fileUrl,
             'pages': pages,
             'language': language,
@@ -161,7 +157,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
           },
         ),
       ),
-      body: Stack( // Use Stack for overlaying loading indicator
+      body: Stack(
         children: [
           Container(
             padding: const EdgeInsets.all(16.0),
@@ -203,14 +199,76 @@ class _AddBooksPageState extends State<AddBooksPage> {
                         _selectPublicationDate(context), // Publication date field
                         const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: _pickCoverImage,
-                          child: _buildUploadField('Cover Image URL', coverImageUrl, _coverImageFile), // Pass _coverImageFile
+                          onTap: () async {
+                            final ImageSource? source = await showDialog<ImageSource>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Pilih Sumber Gambar'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                                    child: Text('Galeri'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, ImageSource.camera),
+                                    child: Text('Kamera'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (source != null) {
+                              final file = await _picker.pickImage(source: source);
+                              if (file != null) {
+                                setState(() {
+                                  _coverImageFile = File(file.path);
+                                });
+                              }
+                            }
+                          },
+                          child: _buildUploadImageField('Cover Image', coverImageUrl, _coverImageFile),
                         ),
                         const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: _pickFile,
-                          child: _buildUploadField('File URL', fileUrl, _uploadedFile), // Pass _coverImageFile
+                          onTap: () async {
+                            final ImageSource? source = await showDialog<ImageSource>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Pilih Sumber Video'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                                    child: Text('Galeri'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, ImageSource.camera),
+                                    child: Text('Kamera'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (source != null) {
+                              final file = await _picker.pickVideo(source: source);
+                              if (file != null) {
+                                setState(() {
+                                  _videoFile = File(file.path);
+                                  if (_videoFile != null) {
+                                    _storageController.videoPlayerController = VideoPlayerController.file(_videoFile!)
+                                      ..initialize().then((_) {
+                                        setState(() {});
+                                        _storageController.videoPlayerController!.play();
+                                      });
+                                  }
+                                });
+                              }
+                            }
+                          },
+                          child: _buildUploadVideoField('Video Preview', videoUrl, _videoFile, _storageController.videoPlayerController),
                         ),
+                        const SizedBox(height: 20),
+                        // GestureDetector(
+                        //   onTap: _pickFile,
+                        //   child: _buildUploadField('File URL', fileUrl, _uploadedFile),
+                        // ),
                         const SizedBox(height: 20),
                         Center(
                           child: ElevatedButton(
@@ -306,56 +364,113 @@ class _AddBooksPageState extends State<AddBooksPage> {
       ),
     );
   }
-
-  Container _buildUploadField(String label, String url, File? imageFile) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.teal),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 8),
-          // Check if a local image file is picked
-          if (imageFile != null)
-            Image.file(
-              imageFile,
-              fit: BoxFit.cover, // Maintain aspect ratio
+  Widget _buildUploadImageField(String label, String imageUrl, File? file) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 8),
+        Container(
+          height: 150,  // Fixed height for the box
+          width: double.infinity,  // Make the box fill the available width
+          color: Colors.grey[300],
+          child: Center(  // Center the content inside the box
+            child: file != null
+                ? Image.file(
+              file,
+              fit: BoxFit.cover,
+              height: 150,
             )
-          // If no local image, check for a URL
-          else if (url.isNotEmpty)
-          // Use Image.network with a default placeholder for error handling
-            Image.network(
-              url,
-              fit: BoxFit.cover, // Maintain aspect ratio
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                if (loadingProgress == null) return child; // When image is fully loaded
-                return Center(
-                  child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                      : null),
-                ); // Show loading indicator while image loads
-              },
-              errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-                return const Text('Failed to load image', style: TextStyle(color: Colors.grey)); // Error handling
-              },
+                : imageUrl.isNotEmpty
+                ? Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              height: 150,
             )
-          // If neither image is available, show a standard TextField
-          else
-            const TextField(
-              enabled: false,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'No file chosen',
-                hintStyle: TextStyle(color: Colors.grey),
+                : FittedBox(
+              fit: BoxFit.scaleDown,  // Ensure the text is scaled down within the box
+              child: Text(
+                'No image selected',
+                textAlign: TextAlign.center,
               ),
             ),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
-
+  Widget _buildUploadVideoField(String label, String videoUrl,File? file, VideoPlayerController? controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 8),
+        // Dynamic sizing based on screen width and height
+        controller != null && controller.value.isInitialized
+            ? SizedBox(
+          height: Get.height / 2.2,  // Adjust height dynamically based on screen size
+          width: double.infinity,      // Set width dynamically based on screen width
+          child: Card(
+            child: Column(
+              children: [
+                // AspectRatio to maintain the correct video aspect ratio
+                AspectRatio(
+                  aspectRatio: 1,  // Aspect ratio of 1 for square video
+                  child: VideoPlayer(controller),
+                ),
+                // Video progress indicator
+                VideoProgressIndicator(
+                  controller,
+                  allowScrubbing: true,
+                ),
+                // Play/Pause button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        controller.value.isPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: () {
+                        if (controller.value.isPlaying) {
+                          controller.pause();
+                        } else {
+                          controller.play();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )
+            : (videoUrl.isNotEmpty || _videoFile != null)
+            ? Container(
+          height: 150,  // Set container height for video selected state
+          width: double.infinity,  // Full width container
+          color: Colors.grey[300],
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text('Video selected', textAlign: TextAlign.center),
+            ),
+          ),
+        )
+            : Container(
+          height: 150,  // Set container height for no video selected
+          width: double.infinity,  // Full width container
+          color: Colors.grey[300],
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text('No video selected', textAlign: TextAlign.center),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

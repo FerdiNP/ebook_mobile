@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import 'package:prak_mobile/app/controller/auth_controller/storage_controller.dart';
 
 class ProfileView extends StatefulWidget {
   @override
@@ -8,18 +11,7 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  File? _image;
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
-  }
+  final StorageController _storageController = StorageController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +33,45 @@ class _ProfileViewState extends State<ProfileView> {
           children: [
             // Gambar Profil
             GestureDetector(
-              onTap: _pickImage, // Tap Ubah Gambar
-              child: CircleAvatar(
-                radius: 60,
+                onTap: () async {
+                  final ImageSource? source = await showDialog<ImageSource>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Pilih Sumber Gambar'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                          child: Text('Galeri'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, ImageSource.camera),
+                          child: Text('Kamera'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (source != null) {
+                    _storageController.pickImage(source);
+                  }
+                },
+                child: CircleAvatar(
+                radius: 100,
                 backgroundColor: Colors.grey.shade300,
-                backgroundImage: _image != null ? FileImage(_image!) : AssetImage('assets/images/profile-picture.png') as ImageProvider, // Gambar default
-              ),
+                child: Obx(() {
+                  return _storageController.isImageLoading.value
+                      ? const CircularProgressIndicator()
+                      : _storageController.selectedImagePath.value == ''
+                      ? const Text('No image selected')
+                      : ClipOval(
+                    child: Image.file(
+                        File(_storageController.selectedImagePath.value),
+                        fit: BoxFit.cover,
+                        width: 200,
+                        height: 200,
+                    ),
+                  );
+                }),
+              )
             ),
             SizedBox(height: 16),
             Text(

@@ -27,6 +27,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Register",
+            style: TextStyle(color: Colors.white), // Mengatur warna teks agar tetap terlihat
+          ),
+          centerTitle: true, // Memusatkan judul di tengah
+          backgroundColor: Colors.transparent, // Membuat AppBar transparan
+          elevation: 0, // Menghilangkan bayangan AppBar
+        ),
+
         body: Container(
           width: double.infinity,
           decoration: BoxDecoration(

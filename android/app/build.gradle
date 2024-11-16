@@ -15,6 +15,7 @@ android {
     namespace = "com.example.prak_mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    compileSdkVersion 34
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -35,6 +36,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         minSdkVersion 23
+        multiDexEnabled true
     }
 
     buildTypes {

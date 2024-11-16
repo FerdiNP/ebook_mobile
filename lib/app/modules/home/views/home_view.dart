@@ -270,7 +270,6 @@ class HomeView extends GetView<HomeController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section title
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -285,45 +284,45 @@ class HomeView extends GetView<HomeController> {
               Row(
                 children: [
                   Text('Show all', style: TextStyle(color: _mainColor)),
-                  SizedBox(width: 4), // Jarak antara teks dan ikon
-                  Icon(
-                    Icons.arrow_forward, // Ikon panah kanan
-                    color: _mainColor, // Warna ikon
-                    size: 18, // Ukuran ikon
-                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward, color: _mainColor, size: 18),
                 ],
               ),
             ],
           ),
           SizedBox(height: 10),
-          // Horizontal list of books
           SizedBox(
             height: 200,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: books.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/cover.png'),
-                            fit: BoxFit.fill,
+                return GestureDetector(
+                  onTap: () {
+                    Get.toNamed(Routes.BOOK_DETAIL);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage('assets/images/cover.png'),
+                              fit: BoxFit.fill,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        books[index],
-                        style: TextStyle(color: Colors.white),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                        SizedBox(height: 8),
+                        Text(
+                          books[index],
+                          style: TextStyle(color: Colors.white),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
