@@ -53,7 +53,8 @@ dependencies:
   video_player:
   speech_to_text:
   permission_handler:
-  audioplayers:
+  audioplayers: ^5.2.1
+  file_picker:
 
 dev_dependencies:
   flutter_test:

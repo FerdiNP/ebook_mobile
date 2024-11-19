@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:prak_mobile/app/controller/auth_controller/audio_controller.dart';
 import 'package:prak_mobile/app/controller/auth_controller/storage_controller.dart';
 import 'package:prak_mobile/app/routes/app_pages.dart';
 import 'package:video_player/video_player.dart';
@@ -15,6 +17,7 @@ class AddBooksPage extends StatefulWidget {
 
 class _AddBooksPageState extends State<AddBooksPage> {
   final StorageController _storageController = StorageController();
+  final AudioController _audioController = Get.put(AudioController());
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   String id = '';
@@ -25,11 +28,13 @@ class _AddBooksPageState extends State<AddBooksPage> {
   DateTime? publicationDate;
   String coverImageUrl = '';
   String videoUrl = '';
+  String audioUrl = '';
   String fileUrl = '';
   int pages = 0;
   String language = '';
   File? _coverImageFile;
   File? _videoFile;
+  File? _audioFile;
   File? _uploadedFile;
   bool _isUploading = false;
   bool _isLoading = false;
@@ -46,6 +51,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
       genre = args['genre'] ?? '';
       coverImageUrl = args['coverImageUrl'] ?? '';
       videoUrl = args['videoUrl'] ?? '';
+      audioUrl = args['audioUrl'] ?? '';
       fileUrl = args['fileUrl'] ?? '';
       pages = args['pages'] ?? 0;
       language = args['language'] ?? '';
@@ -80,6 +86,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
           _isUploading = true; // Prevent double uploads
           coverImageUrl = await _uploadFile(_coverImageFile!, 'covers');
           print("Cover image uploaded to: $coverImageUrl");
+          _isUploading = false;
         }
 
         // if (_uploadedFile != null && !_isUploading) {
@@ -92,9 +99,19 @@ class _AddBooksPageState extends State<AddBooksPage> {
           _isUploading = true; // Prevent double uploads
           videoUrl = await _uploadFile(_videoFile!, 'videos');
           print("Video uploaded to: $videoUrl");
+          _isUploading = false;
         } else {
           print("Not Found");
         }
+
+          if (_audioFile != null && !_isUploading) {
+            _isUploading = true; // Prevent double uploads
+            audioUrl = await _uploadFile(_audioFile!, 'audios');
+            print("Audio uploaded to: $audioUrl");
+            _isUploading = false;
+          } else {
+            print("Not Found");
+          }
 
         if (id.isNotEmpty) {
           await FirebaseFirestore.instance.collection('books').doc(id).update({
@@ -105,6 +122,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
             'publicationDate': Timestamp.fromDate(publicationDate!),
             'coverImageUrl': coverImageUrl,
             'videoUrl': videoUrl,
+            'audioUrl': audioUrl,
             'fileUrl': fileUrl,
             'pages': pages,
             'language': language,
@@ -119,6 +137,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
             'publicationDate': Timestamp.fromDate(publicationDate!),
             'coverImageUrl': coverImageUrl,
             'videoUrl': videoUrl,
+            'audioUrl': audioUrl,
             'fileUrl': fileUrl,
             'pages': pages,
             'language': language,
@@ -262,13 +281,16 @@ class _AddBooksPageState extends State<AddBooksPage> {
                               }
                             }
                           },
-                          child: _buildUploadVideoField('Video Preview', videoUrl, _videoFile, _storageController.videoPlayerController),
+                          child: _buildUploadVideoField('Video File', videoUrl, _videoFile, _storageController.videoPlayerController),
                         ),
                         const SizedBox(height: 20),
                         // GestureDetector(
                         //   onTap: _pickFile,
                         //   child: _buildUploadField('File URL', fileUrl, _uploadedFile),
                         // ),
+                        GestureDetector(
+                          child: _buildUploadAudioField('Audio File', audioUrl, _audioFile, _audioController),
+                        ),
                         const SizedBox(height: 20),
                         Center(
                           child: ElevatedButton(
@@ -399,6 +421,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
       ],
     );
   }
+
   Widget _buildUploadVideoField(String label, String videoUrl,File? file, VideoPlayerController? controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,4 +496,96 @@ class _AddBooksPageState extends State<AddBooksPage> {
       ],
     );
   }
+
+  Widget _buildUploadAudioField(String label, String audioUrl,File? file, AudioController? controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 8),
+        _audioFile == null && audioUrl.isEmpty
+            ? Container(
+          height: 150, // Tinggi container untuk teks placeholder
+          width: double.infinity, // Lebar penuh
+          color: Colors.grey[300],
+          child: Center(
+            child: Text(
+              'No audio file selected',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        )
+            : Column(
+          children: <Widget>[
+            Obx(() {
+              return Slider(
+                min: 0.0,
+                max: _audioController.duration.value.inSeconds.toDouble(),
+                value: _audioController.position.value.inSeconds.toDouble(),
+                onChanged: (value) {
+                  _audioController.seekAudio(Duration(seconds: value.toInt()));
+                },
+              );
+            }),
+            Obx(() {
+              return Text(
+                '${_formatDuration(_audioController.position.value)} / ${_formatDuration(_audioController.duration.value)}',
+              );
+            }),
+            Obx(() {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _audioController.isPlaying.value
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                    ),
+                    onPressed: () {
+                      if (_audioController.isPlaying.value) {
+                        _audioController.pauseAudio();
+                      } else {
+                        if (_audioFile != null || audioUrl.isNotEmpty) {
+                          _audioController.playAudio(
+                              _audioFile?.path ?? audioUrl);
+                        }
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.stop),
+                    onPressed: _audioController.stopAudio,
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Center(child:
+          ElevatedButton(
+            onPressed: () async {
+              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                type: FileType.audio,
+              );
+              if (result != null && result.files.single.path != null) {
+                setState(() {
+                  _audioFile = File(result.files.single.path!);
+                });
+                _audioController.setAudio(_audioFile!.path);
+              }
+            },
+            child: const Text('Pick Audio File'),
+          ),
+        )
+      ],
+    );
+  }
+
+
+  String _formatDuration(Duration duration) {
+    return "${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}";
+  }
+
 }

@@ -130,6 +130,7 @@ class AccountView extends StatelessWidget {
           icon: Icons.payment,
           title: 'Payment',
           onTap: () {
+            Get.toNamed(Routes.TEST);
           },
           showArrow: true,
         ),

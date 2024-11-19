@@ -16,36 +16,39 @@ class BookListPage extends StatefulWidget {
 
 class _BookListPageState extends State<BookListPage> {
   final GoogleBooksService _booksService = GoogleBooksService();
-  final VoiceController _videoController = VoiceController(); // Inisialisasi HomeController
+  final VoiceController _voiceController = Get.put(VoiceController()); // Ensure the controller is initialized
   List<Book> _books = [];
   List<Book> _filteredBooks = [];
   bool _loading = false;
   String? _errorMessage;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchBooks(); // Panggil fungsi untuk mengambil data buku pada awalnya
+    _fetchBooks(); // Fetch books on load
 
-    // Update teks pencarian ketika pengenalan suara selesai
-    _videoController.text.listen((recognizedText) {
+    // Update search when voice input is recognized
+    _voiceController.text.listen((recognizedText) {
+      print("Voice recognized: $recognizedText");  // Debugging voice input
       _searchController.text = recognizedText;
-      _filterBooks(recognizedText); // Filter hasil berdasarkan teks pengenalan suara
+      _filterBooks(recognizedText); // Filter results based on voice input
     });
   }
 
+  // Fetch books from the API
+// Fetch books from the API based on search query
   void _fetchBooks([String query = "Stephen King"]) async {
     setState(() {
       _loading = true;
-      _errorMessage = null; // Reset pesan kesalahan
+      _errorMessage = null;
     });
 
     try {
       final books = await _booksService.fetchBooks(query);
       setState(() {
         _books = books;
-        _filteredBooks = books; // Menyimpan semua buku untuk pencarian
+        _filteredBooks = books; // Set the books for initial display
       });
     } catch (error) {
       setState(() {
@@ -58,17 +61,13 @@ class _BookListPageState extends State<BookListPage> {
     }
   }
 
-  // Fungsi untuk filter buku berdasarkan input pencarian
+// Filter books based on search query (either typed or voice input)
   void _filterBooks(String query) {
-    final filtered = _books.where((book) {
-      final titleLower = book.title.toLowerCase();
-      final queryLower = query.toLowerCase();
-      return titleLower.contains(queryLower); // Membandingkan judul buku dengan query
-    }).toList();
-
-    setState(() {
-      _filteredBooks = filtered;
-    });
+    if (query.isEmpty) {
+      _fetchBooks(); // If search query is empty, fetch all books again
+    } else {
+      _fetchBooks(query); // Fetch books based on search query
+    }
   }
 
   @override
@@ -85,7 +84,7 @@ class _BookListPageState extends State<BookListPage> {
           // Search Bar
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
+            child: Obx(() => TextField(
               controller: _searchController,
               style: const TextStyle(color: _textColor),
               decoration: InputDecoration(
@@ -98,28 +97,26 @@ class _BookListPageState extends State<BookListPage> {
                       icon: const Icon(Icons.search, color: _textColor),
                       onPressed: () {
                         if (_searchController.text.isNotEmpty) {
-                          _filterBooks(_searchController.text);
+                          _filterBooks(_searchController.text); // Update books based on query
                         }
                       },
                     ),
-                    Obx(
-                          () => IconButton(
-                        icon: Icon(
-                          _videoController.isListening.value
-                              ? Icons.mic
-                              : Icons.mic_none,
-                          color: _videoController.isListening.value
-                              ? Colors.red
-                              : _textColor,
-                        ),
-                        onPressed: () {
-                          if (_videoController.isListening.value) {
-                            _videoController.stopListening();
-                          } else {
-                            _videoController.startListening();
-                          }
-                        },
+                    IconButton(
+                      icon: Icon(
+                        _voiceController.isListening.value
+                            ? Icons.mic
+                            : Icons.mic_none,
+                        color: _voiceController.isListening.value
+                            ? Colors.red
+                            : _textColor,
                       ),
+                      onPressed: () {
+                        if (_voiceController.isListening.value) {
+                          _voiceController.stopListening();
+                        } else {
+                          _voiceController.startListening();
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -129,12 +126,11 @@ class _BookListPageState extends State<BookListPage> {
                 ),
               ),
               onChanged: (value) {
-                // Setiap kali teks diubah, lakukan filter
-                _filterBooks(value);
+                _filterBooks(value); // Fetch and filter books as the user types
               },
-            ),
+            )),
           ),
-          // Tampilan buku (daftar buku yang difilter)
+          // Display filtered books
           Expanded(
             child: _loading
                 ? Center(
@@ -155,10 +151,10 @@ class _BookListPageState extends State<BookListPage> {
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Jumlah kolom
+                  crossAxisCount: 2,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
-                  childAspectRatio: 0.6, // Rasio tinggi dan lebar
+                  childAspectRatio: 0.6,
                 ),
                 itemCount: _filteredBooks.length,
                 itemBuilder: (context, index) {
@@ -172,15 +168,14 @@ class _BookListPageState extends State<BookListPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                BookDetailPage(bookId: book.id),
+                            builder: (context) => BookDetailPage(bookId: book.id),
                           ),
                         );
                       },
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Gambar buku di tengah
+                          // Book image
                           Expanded(
                             child: Center(
                               child: ClipRRect(
@@ -192,13 +187,12 @@ class _BookListPageState extends State<BookListPage> {
                                 )
                                     : Container(
                                   color: _mainColor,
-                                  child: const Icon(Icons.book,
-                                      size: 50, color: _textColor),
+                                  child: const Icon(Icons.book, size: 50, color: _textColor),
                                 ),
                               ),
                             ),
                           ),
-                          // Judul buku di bawah gambar
+                          // Book title
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
@@ -210,13 +204,12 @@ class _BookListPageState extends State<BookListPage> {
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center, // Pusatkan judul
+                              textAlign: TextAlign.center,
                             ),
                           ),
                           const Padding(
                             padding: EdgeInsets.only(bottom: 8.0),
-                            child: Icon(Icons.arrow_forward_ios,
-                                size: 16, color: _textColor),
+                            child: Icon(Icons.arrow_forward_ios, size: 16, color: _textColor),
                           ),
                         ],
                       ),
