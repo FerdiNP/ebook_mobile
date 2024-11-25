@@ -13,9 +13,9 @@ abstract class Routes {
   static const PROFILE = _Paths.PROFILE;
   static const BOOKLIST = _Paths.BOOKLIST;
   static const BOOK_DETAIL = _Paths.BOOK_DETAIL;
+  static const LOCATION = _Paths.LOCATION;
+  static const MAP = _Paths.MAP;
   static const TEST = _Paths.TEST;
-
-
 }
 
 abstract class _Paths {
@@ -30,5 +30,7 @@ abstract class _Paths {
   static const PROFILE = '/profile';
   static const BOOKLIST = '/book-list';
   static const BOOK_DETAIL = '/book-detail';
+  static const LOCATION = '/location';
+  static const MAP = '/map';
   static const TEST = '/test';
 }

@@ -12,7 +12,7 @@ class AccountView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Home',
+          'Menu',
           style: TextStyle(
             fontFamily: 'Gotham',
             fontWeight: FontWeight.bold,
@@ -138,6 +138,14 @@ class AccountView extends StatelessWidget {
           icon: Icons.subscriptions_outlined,
           title: 'Subscription',
           onTap: () {
+          },
+          showArrow: true,
+        ),
+        _buildMenuItem(
+          icon: Icons.location_on,
+          title: 'Location',
+          onTap: () {
+            Get.toNamed(Routes.LOCATION);
           },
           showArrow: true,
         ),

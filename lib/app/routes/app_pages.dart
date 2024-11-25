@@ -3,6 +3,8 @@ import 'package:prak_mobile/app/modules/account/views/account_view.dart';
 import 'package:prak_mobile/app/modules/admin/views/admin_view.dart';
 import 'package:prak_mobile/app/modules/book_view/book_page.dart';
 import 'package:prak_mobile/app/modules/detail_book/detail_book.dart';
+import 'package:prak_mobile/app/modules/location/views/location_view.dart';
+import 'package:prak_mobile/app/modules/location/views/map_view.dart';
 import 'package:prak_mobile/app/modules/login/views/login_views.dart';
 import 'package:prak_mobile/app/modules/profile/profile_view.dart';
 import 'package:prak_mobile/app/modules/profile_detail/view.dart';
@@ -64,6 +66,14 @@ class AppPages {
     GetPage(
       name: _Paths.BOOK_DETAIL,
       page: () => BookDetailPage(),
+    ),
+    GetPage(
+      name: _Paths.LOCATION,
+      page: () => LocationView(),
+    ),
+    GetPage(
+      name: _Paths.MAP,
+      page: () => MapView(),
     ),
     GetPage(
       name: _Paths.TEST,

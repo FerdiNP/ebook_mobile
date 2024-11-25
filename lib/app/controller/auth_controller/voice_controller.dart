@@ -37,14 +37,20 @@ class VoiceController extends GetxController {
     await checkMicrophonePermission();
     if (await Permission.microphone.isGranted) {
       isListening.value = true;
-      await _speech.listen(onResult: (result) {
-        // Memperbarui kata-kata yang dikenali ke dalam variabel teks
-        text.value = result.recognizedWords;
-      });
+      await _speech.listen(
+        onResult: (result) {
+          text.value = result.recognizedWords;
+
+          if (result.finalResult) {
+            stopListening();
+          }
+        },
+      );
     } else {
       print("Izin mikrofon ditolak.");
     }
   }
+
 
   // Menghentikan proses pengenalan suara
   void stopListening() async {

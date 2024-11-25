@@ -428,17 +428,15 @@ class _AddBooksPageState extends State<AddBooksPage> {
       children: [
         Text(label),
         const SizedBox(height: 8),
-        // Dynamic sizing based on screen width and height
         controller != null && controller.value.isInitialized
             ? SizedBox(
-          height: Get.height / 2.2,  // Adjust height dynamically based on screen size
-          width: double.infinity,      // Set width dynamically based on screen width
+          height: Get.height / 2.2,
+          width: double.infinity,
           child: Card(
             child: Column(
               children: [
-                // AspectRatio to maintain the correct video aspect ratio
                 AspectRatio(
-                  aspectRatio: 1,  // Aspect ratio of 1 for square video
+                  aspectRatio: 1,
                   child: VideoPlayer(controller),
                 ),
                 // Video progress indicator
@@ -472,8 +470,8 @@ class _AddBooksPageState extends State<AddBooksPage> {
         )
             : (videoUrl.isNotEmpty || _videoFile != null)
             ? Container(
-          height: 150,  // Set container height for video selected state
-          width: double.infinity,  // Full width container
+          height: 150,
+          width: double.infinity,
           color: Colors.grey[300],
           child: Center(
             child: FittedBox(
@@ -483,8 +481,8 @@ class _AddBooksPageState extends State<AddBooksPage> {
           ),
         )
             : Container(
-          height: 150,  // Set container height for no video selected
-          width: double.infinity,  // Full width container
+          height: 150,
+          width: double.infinity,
           color: Colors.grey[300],
           child: Center(
             child: FittedBox(
@@ -582,7 +580,6 @@ class _AddBooksPageState extends State<AddBooksPage> {
       ],
     );
   }
-
 
   String _formatDuration(Duration duration) {
     return "${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}";

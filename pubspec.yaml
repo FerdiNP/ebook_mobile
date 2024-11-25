@@ -55,6 +55,12 @@ dependencies:
   permission_handler:
   audioplayers: ^5.2.1
   file_picker:
+  geolocator:
+  geocoding:
+  google_maps_flutter:
+  url_launcher:
+  flutter_map: ^7.0.2
+  latlong2:
 
 dev_dependencies:
   flutter_test:

@@ -126,7 +126,7 @@ class _BookListPageState extends State<BookListPage> {
                 ),
               ),
               onChanged: (value) {
-                _filterBooks(value); // Fetch and filter books as the user types
+                _filterBooks(value);
               },
             )),
           ),

@@ -15,17 +15,14 @@ class AudioController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Memonitor perubahan durasi audio
     _audioPlayer.onDurationChanged.listen((d) {
       duration.value = d;
     });
 
-    // Memonitor perubahan posisi audio
     _audioPlayer.onPositionChanged.listen((p) {
       position.value = p;
     });
 
-    // Memonitor status pemutaran
     _audioPlayer.onPlayerStateChanged.listen((state) {
       isPlaying.value = (state == PlayerState.playing);
     });
