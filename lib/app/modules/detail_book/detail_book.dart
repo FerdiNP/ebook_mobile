@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prak_mobile/app/routes/app_pages.dart';
@@ -7,40 +8,36 @@ class BookDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final book = Get.arguments as DocumentSnapshot;
+    final title = book['title'] ?? 'No Title';
+    final imageUrl = book['coverImageUrl'] ?? 'default_image_url';
+    final author = book['author'] ?? 'Unknown Author';
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Get.offNamed(Routes.HOME); // Navigate back to the Home page
+            Get.offNamed(Routes.HOME);
           },
         ),
-        backgroundColor: Colors.transparent, // Transparent AppBar
-        elevation: 0, // Remove shadow of the AppBar
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         scrolledUnderElevation: 0,
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
-        selectedItemColor: Colors.white,
+        selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.library_books),
-            label: 'Library',
-          ),
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+          BottomNavigationBarItem(icon: Icon(Icons.library_books), label: 'Library'),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 0), // Add horizontal padding
+        padding: const EdgeInsets.symmetric(horizontal: 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -48,25 +45,24 @@ class BookDetailPage extends StatelessWidget {
               children: [
                 // Blur Background
                 Container(
-                  width: double.infinity, // Full width for the background image
+                  width: double.infinity,
                   height: 350,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/images/cover.png'),
-                      fit: BoxFit.cover, // Ensures the image covers the entire container
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 Container(
-                  width: double.infinity, // Ensures overlay is also full width
+                  width: double.infinity,
                   height: 350,
-                  color: Colors.black.withOpacity(0.7), // Black overlay with transparency
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0), // Padding for content
+                  color: Colors.black.withOpacity(0.7),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Align(
-                    alignment: Alignment.bottomCenter, // Content alignment
+                    alignment: Alignment.bottomCenter,
                     child: Column(
                       children: [
-                        // Your content, such as buttons or text
                       ],
                     ),
                   ),
@@ -77,8 +73,8 @@ class BookDetailPage extends StatelessWidget {
                   left: MediaQuery.of(context).size.width / 2 - 100,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/images/cover.png',
+                    child: Image.network(
+                      imageUrl,
                       width: 200,
                       height: 300,
                       fit: BoxFit.cover,
@@ -97,7 +93,7 @@ class BookDetailPage extends StatelessWidget {
                           child: ElevatedButton.icon(
                             onPressed: () {},
                             icon: const Icon(Icons.book, color: Colors.white),
-                            label: const Text('Read Nexus', style: TextStyle(color: Colors.white)),
+                            label: const Text('Read', style: TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFF232538),
                               shape: const RoundedRectangleBorder(
@@ -112,7 +108,7 @@ class BookDetailPage extends StatelessWidget {
                           child: ElevatedButton.icon(
                             onPressed: () {},
                             icon: const Icon(Icons.play_circle, color: Colors.white),
-                            label: const Text('Play Nexus', style: TextStyle(color: Colors.white)),
+                            label: const Text('Play', style: TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFF232538),
                               shape: const RoundedRectangleBorder(
@@ -137,7 +133,7 @@ class BookDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Project Management for the Unofficial Project Manager',
+                    title,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -146,7 +142,7 @@ class BookDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Kory Kogon, Suzette Blakemore, and James Wood\nA FranklinCovey Title',
+                    author,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
@@ -159,16 +155,19 @@ class BookDetailPage extends StatelessWidget {
                       Chip(
                         label: Text('Personal growth'),
                         backgroundColor: Colors.grey.shade800,
+                        labelStyle: TextStyle(color: Colors.white),
                       ),
                       const SizedBox(width: 8),
                       Chip(
                         label: Text('Culture & Society'),
                         backgroundColor: Colors.grey.shade800,
+                        labelStyle: TextStyle(color: Colors.white),
                       ),
                       const SizedBox(width: 8),
                       Chip(
                         label: Text('Fiction'),
                         backgroundColor: Colors.grey.shade800,
+                        labelStyle: TextStyle(color: Colors.white),
                       ),
                     ],
                   ),
@@ -183,7 +182,7 @@ class BookDetailPage extends StatelessWidget {
                   ),
                   ChapterTile(number: '01', title: 'Introduction', isLocked: true),
                   ChapterTile(number: '02', title: 'Creating the Vision', isLocked: true),
-                  ChapterTile(number: '03', title: 'Introduction', isLocked: true),
+                  ChapterTile(number: '03', title: 'End', isLocked: true),
                   const SizedBox(height: 20),
                   // Author Summary
                   ListTile(
@@ -192,7 +191,7 @@ class BookDetailPage extends StatelessWidget {
                       backgroundImage: AssetImage('assets/images/profile-picture.png'),
                     ),
                     title: Text(
-                      'James Wood',
+                      author,
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(

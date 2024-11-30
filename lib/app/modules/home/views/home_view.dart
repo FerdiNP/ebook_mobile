@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prak_mobile/app/modules/detail_book/detail_book.dart';
 import 'package:prak_mobile/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 import '../../profile/profile_view.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 const _mainColor = Color(0xFFCDE7BE);
 
@@ -157,15 +158,12 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     bookListSection(
                       title: 'Trending',
-                      books: ['The Good Guy', 'Futurama', 'Creative Exploration'],
                     ),
                     bookListSection(
                       title: '5-Minutes Read',
-                      books: ['Explore Creativity', 'Futurama', 'Norse Mythology'],
                     ),
                     bookListSection(
                       title: 'For You',
-                      books: ['The Good Guy', 'Futurama', 'Creative Exploration'],
                     ),
                   ],
                 ),
@@ -177,14 +175,20 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     bookListSection(
                       title: '5-Minutes Read',
-                      books: ['Explore Creativity', 'Futurama', 'Norse Mythology'],
                     ),
                   ],
                 ),
               ),
               // Quick Read Tab
-              Center(
-                child: Text('Quick Read Section', style: TextStyle(color: Colors.white)),
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    bookListSection(
+                      title: 'Quick Read',
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -264,7 +268,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget bookListSection({required String title, required List<String> books}) {
+  Widget bookListSection({required String title}) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -293,37 +297,62 @@ class HomeView extends GetView<HomeController> {
           SizedBox(height: 10),
           SizedBox(
             height: 200,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: books.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    Get.toNamed(Routes.BOOK_DETAIL);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/cover.png'),
-                              fit: BoxFit.fill,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('books') // Nama koleksi di Firestore
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No books available'));
+                }
+
+                final books = snapshot.data!.docs;
+
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: books.length,
+                  itemBuilder: (context, index) {
+                    final book = books[index];
+                    final title = book['title'];
+                    final imageUrl = book['coverImageUrl'];
+
+                    return GestureDetector(
+                      onTap: () {
+                        Get.to(() => BookDetailPage(), arguments: books[index]);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 120,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(imageUrl), // Menampilkan gambar dari URL
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(height: 8),
+                            Text(
+                              title,
+                              style: TextStyle(color: Colors.white),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          books[index],
-                          style: TextStyle(color: Colors.white),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -332,6 +361,7 @@ class HomeView extends GetView<HomeController> {
       ),
     );
   }
+
 
 }
 

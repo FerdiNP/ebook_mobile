@@ -1,20 +1,20 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart'; // Untuk koordinat OpenStreetMap
-import 'package:flutter_map/flutter_map.dart'; // Plugin untuk OpenStreetMap
 import 'package:prak_mobile/app/controller/auth_controller/gps_controller.dart';
+import 'package:prak_mobile/app/routes/app_pages.dart';
 
 class LocationView extends StatelessWidget {
-  final GPSController gpsController = Get.put(GPSController());
+  final GPSController controller = Get.put(GPSController());
+  final MapController mapController = MapController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "My Location",
+          'Toko Buku Terdekat',
           style: TextStyle(
             fontFamily: 'Gotham',
             fontWeight: FontWeight.bold,
@@ -23,177 +23,75 @@ class LocationView extends StatelessWidget {
         ),
         backgroundColor: const Color(0xFF1E1E1E),
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back,
+            color: Colors.white,),
           onPressed: () {
-            Get.back();
+            Get.offNamed(Routes.HOME); // Fungsi kembali ke halaman Home
           },
         ),
       ),
-      backgroundColor: const Color(0xFF1E1E1E),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: Obx(() {
+        return Stack(
+          children: [
+            FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialCenter: controller.currentPosition.value != null
+                    ? LatLng(
+                  controller.currentPosition.value!.latitude,
+                  controller.currentPosition.value!.longitude,
+                )
+                    : const LatLng(-7.250445, 112.768845),
+                initialZoom: 15.0,
+              ),
               children: [
-                const Center(
-                  child: Text("Temukan Lokasi Anda",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.app',
                 ),
-                const SizedBox(height: 10),
-
-                Obx(() => Center(
-                    child: Text(
-                      gpsController.locationMessage.value,
-                      textAlign: TextAlign.center,  // Mengatur teks agar rata tengah
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Row untuk menampilkan tombol berdampingan
-                Obx(() => gpsController.isLoading.value
-                      ? const Center(child: CircularProgressIndicator())
-                      : Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => gpsController.getCurrentLocation(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.greenAccent,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          textStyle: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.red,
-                          ),
-                        ),
-                        child: const Text("Dapatkan Lokasi",
-                          style: const TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF1E1E1E),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () => gpsController.openGoogleMaps(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.greenAccent,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          textStyle: const TextStyle(fontSize: 16),
-                        ),
-                        child: const Text("Buka di Google Maps",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF1E1E1E),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                MarkerLayer(
+                  markers: controller.mapMarkers,
                 ),
               ],
             ),
-          ),
-          Expanded(
-            child: Obx(() {
-              if (gpsController.currentPosition.value == null) {
-                return Stack(
-                  children: [
-                    FlutterMap(
-                      options: MapOptions(
-                        initialCenter: const LatLng(-6.2088, 106.8456), // Default koordinat
-                        initialZoom: 15,
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                          subdomains: ['a', 'b', 'c'],
-                          userAgentPackageName: 'com.example.prak_mobile',
-                        ),
-                      ],
-                    ),
-                    ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                        child: Container(
-                          color: Colors.black.withOpacity(0.5),
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 15),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Text(
-                                "Lokasi belum ditemukan\nSilakan cari lokasi terlebih dahulu",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+            if (controller.isLoading.value)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        );
+      }),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () async {
+              await controller.getCurrentLocation();
+              if (controller.currentPosition.value != null) {
+                mapController.move(
+                  LatLng(
+                    controller.currentPosition.value!.latitude,
+                    controller.currentPosition.value!.longitude,
+                  ),
+                  15.0,
                 );
               }
-
-              return FlutterMap(
-                options: MapOptions(
-                  initialCenter: LatLng(
-                    gpsController.currentPosition.value!.latitude,
-                    gpsController.currentPosition.value!.longitude,
-                  ),
-                  initialZoom: 15,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    subdomains: ['a', 'b', 'c'],
-                    userAgentPackageName: 'com.example.prak_mobile',
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: LatLng(
-                          gpsController.currentPosition.value!.latitude,
-                          gpsController.currentPosition.value!.longitude,
-                        ),
-                        width: 80.0,
-                        height: 80.0,
-                        child: const Icon(
-                          Icons.location_on,
-                          color: Colors.red,
-                          size: 40.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            }),
+            },
+            heroTag: 'getLocation',
+            backgroundColor: Color(0xFF1E1E1E), // Mengubah warna latar belakang
+            foregroundColor: Colors.white, // Mengubah warna ikon menjadi putih
+            child: const Icon(Icons.my_location),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            onPressed: controller.openGoogleMapsForBookstores,
+            heroTag: 'openMap',
+            backgroundColor: Color(0xFF1E1E1E), // Mengubah warna latar belakang
+            foregroundColor: Colors.white, // Mengubah warna ikon menjadi putih
+            child: const Icon(Icons.map),
           ),
         ],
       ),

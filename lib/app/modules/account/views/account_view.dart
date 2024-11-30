@@ -24,7 +24,7 @@ class AccountView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back,
           color: Colors.white,),
           onPressed: () {
-            Get.offNamed(Routes.HOME); // Fungsi kembali ke halaman Home
+            Get.offNamed(Routes.HOME);
           },
         ),
       ),
@@ -143,7 +143,7 @@ class AccountView extends StatelessWidget {
         ),
         _buildMenuItem(
           icon: Icons.location_on,
-          title: 'Location',
+          title: 'Toko Buku Terdekat',
           onTap: () {
             Get.toNamed(Routes.LOCATION);
           },

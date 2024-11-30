@@ -38,7 +38,6 @@ dependencies:
   get: ^4.6.6
   google_fonts: ^6.2.1
   image_picker: ^1.1.2
-  http:
   webview_flutter: ^4.0.0
   html:
   firebase_core:
@@ -59,8 +58,9 @@ dependencies:
   geocoding:
   google_maps_flutter:
   url_launcher:
-  flutter_map: ^7.0.2
   latlong2:
+  flutter_map: ^7.0.2
+  http:
 
 dev_dependencies:
   flutter_test:

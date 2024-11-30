@@ -44,74 +44,87 @@ class _LoginPageState extends State<LoginPage> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _showPasswordInput ? "Enter Password" : "Log in",
+                    style: theme.textTheme.headlineMedium!.copyWith(
+                      color: Colors.white,fontWeight: FontWeight.bold,
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _showPasswordInput ? "Enter Password" : "Log in",
-                            style: theme.textTheme.headlineMedium,
-                          ),
-                          const SizedBox(height: 20),
-                          _showPasswordInput ? _buildPasswordInput() : _buildEmailInput(),
-                          const SizedBox(height: 16),
-                          _showPasswordInput ? _buildLoginButton() : _buildContinueButton(),
-                          if (!_showPasswordInput) ...[
-                            const SizedBox(height: 16),
-                            GestureDetector(
-                              onTap: () {},
-                              child: Text(
-                                "Forgot password?",
-                                style: theme.textTheme.bodyMedium!.copyWith(color: Colors.green),
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                            _buildAlternativeLoginOptions(),
-                            const SizedBox(height: 32),
-                            _buildFacebookLoginButton(),
-                            const SizedBox(height: 16),
-                            _buildGoogleLoginButton(),
-                            const SizedBox(height: 16),
-                            _buildAppleLoginButton(),
-                            const SizedBox(height: 32),
-                            InkWell(
-                              onTap: () {
-                                // Tambahkan logika untuk berpindah halaman di sini
-                                Get.toNamed(Routes.REGISTER);
-                              },
-                              child: RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Don’t have an account?",
-                                      style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 20),
+                  ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF313333).withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,  // Align children to the start
+                            children: [
+                              _showPasswordInput ? _buildPasswordInput() : _buildEmailInput(),
+                              const SizedBox(height: 16),
+                              _showPasswordInput ? _buildLoginButton() : _buildContinueButton(),
+                              const SizedBox(height: 16),
+                              // Centering "Forgot password?" text
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Text(
+                                    "Forgot password?",
+                                    style: theme.textTheme.bodyMedium!.copyWith(
+                                      color: Color(0xFFCDE7BE),
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    TextSpan(
-                                      text: " Sign up",
-                                      style: theme.textTheme.bodyMedium!.copyWith(color: Colors.blue),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                                textAlign: TextAlign.left,
                               ),
-                            )
-                          ],
-                        ],
+                              if (!_showPasswordInput) ...[
+                                const SizedBox(height: 32),
+                                _buildAlternativeLoginOptions(),
+                                const SizedBox(height: 32),
+                                _buildFacebookLoginButton(),
+                                const SizedBox(height: 16),
+                                _buildGoogleLoginButton(),
+                                const SizedBox(height: 16),
+                                _buildAppleLoginButton(),
+                                const SizedBox(height: 32),
+                                InkWell(
+                                  onTap: () {
+                                    Get.toNamed(Routes.REGISTER);
+                                  },
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: "Don’t have an account?",
+                                          style: theme.textTheme.bodyMedium!.copyWith(color: Colors.white, fontWeight: FontWeight.w100),
+                                        ),
+                                        TextSpan(
+                                          text: " Sign up!",
+                                          style: theme.textTheme.bodyMedium!.copyWith(color: Color(0xFFCDE7BE), fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    textAlign: TextAlign.start,  // Align "Don’t have an account?" to the start
+                                  ),
+                                )
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -127,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
         labelText: "Email",
         filled: true,
         fillColor: const Color(0xFFEAF4F4),
+        floatingLabelBehavior: FloatingLabelBehavior.never,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
@@ -143,26 +157,45 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildPasswordInput() {
-    return TextFormField(
-      controller: _passwordController,
-      obscureText: true,
-      decoration: InputDecoration(
-        labelText: "Password",
-        filled: true,
-        fillColor: const Color(0xFFEAF4F4),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your password';
-        }
-        return null;
+    bool _isPasswordVisible = false; // Local state for password visibility
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return TextFormField(
+          controller: _passwordController,
+          obscureText: !_isPasswordVisible, // Use the visibility state
+          decoration: InputDecoration(
+            labelText: "Password",
+            filled: true,
+            fillColor: const Color(0xFFEAF4F4),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            suffixIcon: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isPasswordVisible = !_isPasswordVisible; // Toggle visibility
+                });
+              },
+              child: Icon(
+                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your password';
+            }
+            return null;
+          },
+        );
       },
     );
   }
+
 
   Widget _buildContinueButton() {
     return ElevatedButton(
@@ -183,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       child: const Text(
         "Continue",
-        style: TextStyle(color: Color(0xFF313333)),
+        style: TextStyle(color: Colors.black),
       ),
     );
   }
@@ -207,7 +240,9 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: _authController.isLoading.value
           ? CircularProgressIndicator()
-          : Text('Login'),
+          : Text('Continue' ,
+        style: TextStyle(color: Colors.black),
+      ),
     );
   });
 
@@ -219,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'Or log in with:',
+            'Or',
             style: TextStyle(color: const Color(0xFF939999)),
           ),
         ),
@@ -233,7 +268,7 @@ class _LoginPageState extends State<LoginPage> {
       icon: const Icon(Icons.facebook, color: Color(0xFF313333)),
       onPressed: () {},
       label: const Text(
-        "Facebook",
+        "Login with Facebook",
         style: TextStyle(color: Color(0xFF313333)),
       ),
       style: ElevatedButton.styleFrom(
@@ -251,7 +286,7 @@ class _LoginPageState extends State<LoginPage> {
       icon: const Icon(Icons.g_mobiledata, color: Color(0xFF313333)),
       onPressed: () {},
       label: const Text(
-        "Google",
+        "Login with Google",
         style: TextStyle(color: Color(0xFF313333)),
       ),
       style: ElevatedButton.styleFrom(
@@ -269,7 +304,7 @@ class _LoginPageState extends State<LoginPage> {
       icon: const Icon(Icons.apple, color: Color(0xFF313333)),
       onPressed: () {},
       label: const Text(
-        "Apple",
+        "Login with Apple",
         style: TextStyle(color: Color(0xFF313333)),
       ),
       style: ElevatedButton.styleFrom(
