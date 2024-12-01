@@ -22,7 +22,6 @@ class GPSController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Membuat bounding box untuk area pencarian 2km
       final lat = currentPosition.value!.latitude;
       final lon = currentPosition.value!.longitude;
       final double radiusInDegrees = searchRadius / 111320.0;
@@ -114,16 +113,15 @@ class GPSController extends GetxController {
 
             if (distance <= searchRadius) {
               final store = {
-                'name': element['tags']['name'] ?? 'Toko Buku',
+                'name': element['name'] ?? 'Toko Buku',
                 'latitude': element['lat'],
                 'longitude': element['lon'],
                 'distance': distance,
-                'address': element['tags']['addr:street'] ?? '',
+                'address': element['addr:street'] ?? '',
               };
 
               nearbyBookstores.add(store);
 
-              // Tambahkan marker toko buku
               mapMarkers.add(
                 Marker(
                   point: LatLng(store['latitude'], store['longitude']),
@@ -182,6 +180,7 @@ class GPSController extends GetxController {
         );
       }
     } catch (e) {
+
       print('Error searching bookstores: $e');
       Get.snackbar(
         'Error',
