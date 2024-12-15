@@ -26,7 +26,7 @@ class LocationView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back,
             color: Colors.white,),
           onPressed: () {
-            Get.offNamed(Routes.HOME); // Fungsi kembali ke halaman Home
+            Get.offNamed(Routes.HOME);
           },
         ),
       ),
@@ -81,16 +81,16 @@ class LocationView extends StatelessWidget {
               }
             },
             heroTag: 'getLocation',
-            backgroundColor: Color(0xFF1E1E1E), // Mengubah warna latar belakang
-            foregroundColor: Colors.white, // Mengubah warna ikon menjadi putih
+            backgroundColor: Color(0xFF1E1E1E),
+            foregroundColor: Colors.white,
             child: const Icon(Icons.my_location),
           ),
           const SizedBox(height: 10),
           FloatingActionButton(
             onPressed: controller.openGoogleMapsForBookstores,
             heroTag: 'openMap',
-            backgroundColor: Color(0xFF1E1E1E), // Mengubah warna latar belakang
-            foregroundColor: Colors.white, // Mengubah warna ikon menjadi putih
+            backgroundColor: Color(0xFF1E1E1E),
+            foregroundColor: Colors.white,
             child: const Icon(Icons.map),
           ),
         ],

@@ -16,7 +16,7 @@ class _ManageBooksPageState extends State<ManageBooksPage> {
   Future<void> _deleteBook(String bookId) async {
     try {
       await _booksCollection.doc(bookId).delete();
-      setState(() {}); // Refresh list after deleting the
+      setState(() {});
       Get.snackbar(
         'Success',
         'Book deleted successfully!',

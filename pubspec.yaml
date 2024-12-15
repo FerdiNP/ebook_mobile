@@ -61,6 +61,7 @@ dependencies:
   latlong2:
   flutter_map: ^7.0.2
   http:
+  connectivity_plus:
 
 dev_dependencies:
   flutter_test:

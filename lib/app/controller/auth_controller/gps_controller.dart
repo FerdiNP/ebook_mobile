@@ -14,7 +14,7 @@ class GPSController extends GetxController {
   RxList<Marker> mapMarkers = <Marker>[].obs;
   RxList<Map<String, dynamic>> nearbyBookstores = <Map<String, dynamic>>[].obs;
 
-  static const double searchRadius = 20000; // 2km dalam meter
+  static const double searchRadius = 20000;
 
   Future<void> searchNearbyBookstores() async {
     if (currentPosition.value == null) return;
@@ -102,6 +102,9 @@ class GPSController extends GetxController {
           ),
         );
 
+        print(elements);
+
+
         for (var element in elements) {
           if (element['type'] == 'node') {
             double distance = Geolocator.distanceBetween(
@@ -180,7 +183,6 @@ class GPSController extends GetxController {
         );
       }
     } catch (e) {
-
       print('Error searching bookstores: $e');
       Get.snackbar(
         'Error',
@@ -188,6 +190,7 @@ class GPSController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+      print('Error searching bookstores: $e');
     } finally {
       isLoading.value = false;
     }
@@ -265,7 +268,6 @@ class GPSController extends GetxController {
       currentPosition.value = position;
       locationMessage.value = "Lokasi ditemukan";
 
-      // Cari toko buku di sekitar
       await searchNearbyBookstores();
 
     } catch (e) {

@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prak_mobile/app/controller/auth_controller/audio_controller.dart';
 import 'package:prak_mobile/app/controller/auth_controller/storage_controller.dart';
@@ -20,6 +23,9 @@ class _AddBooksPageState extends State<AddBooksPage> {
   final AudioController _audioController = Get.put(AudioController());
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
+  final GetStorage storage = GetStorage();
+  final Connectivity connectivity = Connectivity();
+  // StreamSubscription<ConnectivityResult>? connectivitySubscription;
   String id = '';
   String title = '';
   String author = '';
@@ -38,6 +44,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
   File? _uploadedFile;
   bool _isUploading = false;
   bool _isLoading = false;
+  bool _wasOffline = false;
 
   @override
   void initState() {
@@ -57,6 +64,9 @@ class _AddBooksPageState extends State<AddBooksPage> {
       language = args['language'] ?? '';
       publicationDate = args['publicationDate'] ?? DateTime.now();
     }
+    connectivity.onConnectivityChanged.listen((connectivityResult) {
+      _updateConnection(connectivityResult);
+    });
   }
 
   Future<String> _uploadFile(File file, String folder) async {
@@ -66,6 +76,57 @@ class _AddBooksPageState extends State<AddBooksPage> {
 
     String downloadUrl = await storageRef.getDownloadURL();
     return downloadUrl;
+  }
+
+  void _updateConnection(List<ConnectivityResult> connectivityResults) {
+    final connectivityResult = connectivityResults.first;
+
+    print("Connectivity changed: $connectivityResult");
+
+    if (connectivityResult == ConnectivityResult.none) {
+      _wasOffline = true;
+    } else {
+      if (_wasOffline) {
+        _wasOffline = false;
+        _syncDataToDatabase();
+      }
+    }
+  }
+
+  void _saveToLocalStorage() {
+    Map<String, dynamic> bookData = {
+      'title': title,
+      'author': author,
+      'description': description,
+      'genre': genre,
+      'publicationDate': Timestamp.fromDate(publicationDate!),
+      '_coverImageFile': _coverImageFile,
+      '_videoFile': _videoFile,
+      '_audioFile': _audioFile,
+      'pages': pages,
+      'language': language,
+    };
+
+    List<Map<String, dynamic>> offlineData = storage.read<List<dynamic>>('offline_books')?.cast<Map<String, dynamic>>() ?? [];
+    offlineData.add(bookData);
+    storage.write('offline_books', offlineData);
+  }
+
+  void _syncDataToDatabase() async {
+    List<Map<String, dynamic>>? offlineData = storage.read<List<dynamic>>('offline_books')?.cast<Map<String, dynamic>>();
+
+    if (offlineData != null && offlineData.isNotEmpty) {
+      for (var data in offlineData) {
+        try {
+          await _saveBook();
+          print("Data lokal berhasil diunggah");
+        } catch (e) {
+          print("Error : $e");
+          print("Gagal mengunggah data lokal");
+        }
+      }
+      storage.remove('offline_books');
+    }
   }
 
   Future<void> _saveBook() async {
@@ -78,12 +139,23 @@ class _AddBooksPageState extends State<AddBooksPage> {
       }
 
       setState(() {
-        _isLoading = true; // Start loading indicator
+        _isLoading = true;
       });
 
       try {
+        print("tes $_wasOffline");
+        if (_wasOffline) {
+          _saveToLocalStorage();
+          Get.snackbar('No internet', 'Data buku akan disimpan secara lokal. Akan diunggah ke database saat kembali online.',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.orangeAccent,
+            colorText: Colors.white,
+          );
+          return;
+        }
+
         if (_coverImageFile != null && !_isUploading) {
-          _isUploading = true; // Prevent double uploads
+          _isUploading = true;
           coverImageUrl = await _uploadFile(_coverImageFile!, 'covers');
           print("Cover image uploaded to: $coverImageUrl");
           _isUploading = false;
@@ -96,7 +168,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
         // }
 
         if (_videoFile != null && !_isUploading) {
-          _isUploading = true; // Prevent double uploads
+          _isUploading = true;
           videoUrl = await _uploadFile(_videoFile!, 'videos');
           print("Video uploaded to: $videoUrl");
           _isUploading = false;
@@ -104,14 +176,14 @@ class _AddBooksPageState extends State<AddBooksPage> {
           print("Not Found");
         }
 
-          if (_audioFile != null && !_isUploading) {
-            _isUploading = true; // Prevent double uploads
-            audioUrl = await _uploadFile(_audioFile!, 'audios');
-            print("Audio uploaded to: $audioUrl");
-            _isUploading = false;
-          } else {
-            print("Not Found");
-          }
+        if (_audioFile != null && !_isUploading) {
+          _isUploading = true; // Prevent double uploads
+          audioUrl = await _uploadFile(_audioFile!, 'audios');
+          print("Audio uploaded to: $audioUrl");
+          _isUploading = false;
+        } else {
+          print("Not Found");
+        }
 
         if (id.isNotEmpty) {
           await FirebaseFirestore.instance.collection('books').doc(id).update({
@@ -150,7 +222,7 @@ class _AddBooksPageState extends State<AddBooksPage> {
         Get.snackbar('Error', 'Failed to save book: $e');
       } finally {
         setState(() {
-          _isLoading = false; // Stop loading indicator
+          _isLoading = false;
         });
       }
     }
@@ -562,20 +634,20 @@ class _AddBooksPageState extends State<AddBooksPage> {
         ),
         const SizedBox(height: 16),
         Center(child:
-          ElevatedButton(
-            onPressed: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles(
-                type: FileType.audio,
-              );
-              if (result != null && result.files.single.path != null) {
-                setState(() {
-                  _audioFile = File(result.files.single.path!);
-                });
-                _audioController.setAudio(_audioFile!.path);
-              }
-            },
-            child: const Text('Pick Audio File'),
-          ),
+        ElevatedButton(
+          onPressed: () async {
+            FilePickerResult? result = await FilePicker.platform.pickFiles(
+              type: FileType.audio,
+            );
+            if (result != null && result.files.single.path != null) {
+              setState(() {
+                _audioFile = File(result.files.single.path!);
+              });
+              _audioController.setAudio(_audioFile!.path);
+            }
+          },
+          child: const Text('Pick Audio File'),
+        ),
         )
       ],
     );
