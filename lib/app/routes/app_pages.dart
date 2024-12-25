@@ -6,6 +6,7 @@ import 'package:prak_mobile/app/modules/detail_book/detail_book.dart';
 import 'package:prak_mobile/app/modules/location/views/location_view.dart';
 import 'package:prak_mobile/app/modules/location/views/map_view.dart';
 import 'package:prak_mobile/app/modules/login/views/login_views.dart';
+import 'package:prak_mobile/app/modules/login/views/reset_password.dart';
 import 'package:prak_mobile/app/modules/profile/profile_view.dart';
 import 'package:prak_mobile/app/modules/profile_detail/view.dart';
 
@@ -74,6 +75,10 @@ class AppPages {
     GetPage(
       name: _Paths.MAP,
       page: () => MapView(),
+    ),
+    GetPage(
+      name: _Paths.RESET_PASSWORD,
+      page: () => ResetPasswordPage(),
     ),
     GetPage(
       name: _Paths.TEST,

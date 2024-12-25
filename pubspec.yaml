@@ -62,6 +62,8 @@ dependencies:
   flutter_map: ^7.0.2
   http:
   connectivity_plus:
+  firebase_app_check:
+  flutter_native_splash:
 
 dev_dependencies:
   flutter_test:

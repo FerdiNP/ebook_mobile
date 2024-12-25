@@ -15,6 +15,7 @@ abstract class Routes {
   static const BOOK_DETAIL = _Paths.BOOK_DETAIL;
   static const LOCATION = _Paths.LOCATION;
   static const MAP = _Paths.MAP;
+  static const RESET_PASSWORD = _Paths.RESET_PASSWORD;
   static const TEST = _Paths.TEST;
 }
 
@@ -32,5 +33,6 @@ abstract class _Paths {
   static const BOOK_DETAIL = '/book-detail';
   static const LOCATION = '/location';
   static const MAP = '/map';
+  static const RESET_PASSWORD = '/reset-password';
   static const TEST = '/test';
 }

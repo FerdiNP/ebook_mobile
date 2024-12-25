@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _showPasswordInput = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -77,7 +78,9 @@ class _LoginPageState extends State<LoginPage> {
                               // Centering "Forgot password?" text
                               Center(
                                 child: GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Get.toNamed(Routes.RESET_PASSWORD);
+                                  },
                                   child: Text(
                                     "Forgot password?",
                                     style: theme.textTheme.bodyMedium!.copyWith(

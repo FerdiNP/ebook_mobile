@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prak_mobile/app/modules/home/views/home_view.dart';
 import 'package:prak_mobile/app/routes/app_pages.dart';
+
+const _mainColor = Color(0xFFCDE7BE);
 
 class BookDetailPage extends StatelessWidget {
   const BookDetailPage({super.key});
@@ -153,19 +156,19 @@ class BookDetailPage extends StatelessWidget {
                   Row(
                     children: [
                       Chip(
-                        label: Text('Personal growth'),
+                        label: Text('Category'),
                         backgroundColor: Colors.grey.shade800,
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       const SizedBox(width: 8),
                       Chip(
-                        label: Text('Culture & Society'),
+                        label: Text('Category'),
                         backgroundColor: Colors.grey.shade800,
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       const SizedBox(width: 8),
                       Chip(
-                        label: Text('Fiction'),
+                        label: Text('Category'),
                         backgroundColor: Colors.grey.shade800,
                         labelStyle: TextStyle(color: Colors.white),
                       ),
@@ -173,7 +176,7 @@ class BookDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    '56 Chapters',
+                    '00 Chapters',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -199,42 +202,112 @@ class BookDetailPage extends StatelessWidget {
                       style: TextStyle(color: Colors.grey),
                     ),
                   ),
-                  const SizedBox(height: 20),
                   // Similar Books
-                  Text(
-                    'Similar Books',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    height: 180,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        SimilarBookCard(
-                          imageUrl: 'assets/images/cover.png',
-                          title: 'Explore your Creative Side',
-                        ),
-                        SimilarBookCard(
-                          imageUrl: 'assets/images/cover.png',
-                          title: 'Futurama',
-                        ),
-                        SimilarBookCard(
-                          imageUrl: 'assets/images/cover.png',
-                          title: 'The Good Guy',
-                        ),
-                      ],
-                    ),
-                  ),
+                  bookListSection(title: 'Similar Books'),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget bookListSection({required String title}) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                children: [
+                  Text('Show all', style: TextStyle(color: _mainColor)),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward, color: _mainColor, size: 18),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          SizedBox(
+            height: 200,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('books') // Nama koleksi di Firestore
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No books available'));
+                }
+
+                final books = snapshot.data!.docs;
+
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: books.length,
+                  itemBuilder: (context, index) {
+                    final book = books[index];
+                    final title = book['title'];
+                    final imageUrl = book['coverImageUrl'];
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/book-detail',
+                          arguments: book, // Mengirim data buku ke halaman detail
+                          );
+                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 120,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(imageUrl), // Menampilkan gambar dari URL
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              title,
+                              style: TextStyle(color: Colors.white),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -309,4 +382,6 @@ class SimilarBookCard extends StatelessWidget {
       ),
     );
   }
+
+
 }

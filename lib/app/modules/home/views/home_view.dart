@@ -326,6 +326,7 @@ class HomeView extends GetView<HomeController> {
 
                     return GestureDetector(
                       onTap: () {
+                        print(books[index]); // Check if the correct data is passed
                         Get.to(() => BookDetailPage(), arguments: books[index]);
                       },
                       child: Padding(
