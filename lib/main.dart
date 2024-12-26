@@ -21,8 +21,8 @@ void main() async {
   await FirebaseMessagingHandler().initPushNotification();
   await FirebaseMessagingHandler().initLocalNotification();
   final AuthController _authController = Get.put(AuthController());
-  // WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   runApp(
       GetMaterialApp(
@@ -36,5 +36,5 @@ void main() async {
       )
   );
   DependencyInjection.init();
-  // FlutterNativeSplash.remove();
+  FlutterNativeSplash.remove();
 }
